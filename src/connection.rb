@@ -11,6 +11,7 @@ class Connection
     mc = Memcached.new
     store = Storage.new
     retrieve = Retrieval.new
+    mc.create_hash
     puts "Server started."
 
     loop do
@@ -21,23 +22,24 @@ class Connection
         until client_input == "quit"
           split_string = client_input.split
 
-          if split_string[0] == 'set'
+          if split_string[0] == 'set' || split_string[0] == 'add'
             mc.key = split_string[1]
             store.flag = split_string[2]
             store.exp_time = split_string[3]
             store.size = split_string[4]
             second_input = socket.gets.chomp
             store.value = second_input
-            socket.puts store.set
-          end
+            if split_string[0] == 'set'
+              socket.puts store.set
+            elsif split_string[0] == 'add'
+              socket.puts store.add
+            end
 
-          if split_string[0] == 'get'
-            mc.key = split_string[1]
+          elsif split_string[0] == 'get'
+            mc.key = split_string
             socket.puts retrieve.get
           end
 
-          # socket.puts splitted[0]
-          # socket.puts "You said: #{client_input}!"
           client_input = socket.gets.chomp
         end
 

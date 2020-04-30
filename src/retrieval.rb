@@ -1,6 +1,11 @@
 class Retrieval < Memcached
+
   def get
-    # element = @hash_table.key(:key)
-    # puts element
+    # puts @key
+    # @key.each do |key|
+    #   @@hash_table[key]
+    # end
+    # "END\r\n"
   end
+
 end
