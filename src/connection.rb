@@ -1,7 +1,5 @@
 require 'socket'
 require_relative 'memcached'
-require_relative 'storage'
-require_relative 'retrieval'
 
 class Connection
   def start
@@ -11,8 +9,6 @@ class Connection
     puts "Starting server..."
     server = TCPServer.new(ip_server, port)
     mc = Memcached.new
-    store = Storage.new
-    retrieve = Retrieval.new
     mc.create_hash
     puts "Server started."
 
@@ -29,37 +25,41 @@ class Connection
           # Split user's input to know which command was introduced
           split_string = client_input.split
 
-          # Variable declaration
           cmd = split_string[0]
-          key = split_string[1]
-          flag = split_string[2]
-          exp_time = split_string[3]
-          size = split_string[4]
 
           # Handling of storage commands
-          if cmd == 'set' || cmd == 'add' || cmd == 'append' || cmd == 'prepend'
+          if cmd == 'set' || cmd == 'add' || cmd == 'replace' || cmd == 'append' || cmd == 'prepend'
+            key = split_string[1]
+            flag = split_string[2]
+            exp_time = split_string[3]
+            size = split_string[4]
             mc.key = key
-            store.flag = flag
-            store.exp_time = exp_time
-            store.size = size
+            mc.flag = flag
+            mc.exp_time = exp_time
+            mc.size = size
             # With second_input we receive the data to be inserted
             second_input = socket.gets.chomp
-            store.value = second_input
+            mc.value = second_input
             case cmd
-              when 'set'
-                  socket.puts store.set
-              when 'add'
-                  socket.puts store.add
-              when 'append'
-                  socket.puts store.append
-              when 'prepend'
-                  socket.puts store.prepend
+            when 'set'
+              socket.puts mc.set
+            when 'add'
+              socket.puts mc.add
+            when 'replace'
+              socket.puts mc.replace
+            when 'append'
+              socket.puts mc.append
+            when 'prepend'
+              socket.puts mc.prepend
             end
 
           # Handling of retrieval commands
           elsif cmd == 'get'
             mc.key = split_string
-            socket.puts retrieve.get
+            case cmd
+            when 'get'
+              socket.puts mc.get
+            end
           end
 
           client_input = socket.gets.chomp
