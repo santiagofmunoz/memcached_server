@@ -3,11 +3,11 @@ require 'date'
 class Memcached
 
   attr_accessor :hash_table, :key, :flag, :exp_time, :size, :value
-  # attr_reader :cas_value
+  attr_reader :cas_value
 
-  # def initialize
-  #   @cas_value = 0
-  # end
+  def initialize
+    @cas_value = 0
+  end
 
   # This method must be called ONCE and ONLY when the server is started
   # otherwise the table will be regenerated and emptied.
@@ -26,7 +26,7 @@ class Memcached
     int_exp_time = Integer(@exp_time)
     int_size = Integer(@size)
     string_value = String(@value)
-    # new_cas_value = @cas_value+1
+    new_cas_value = @cas_value+1
     value_length = string_value.length
 
     # Check if the size of the data sent is larger than the specified size
@@ -46,12 +46,12 @@ class Memcached
           unix_expiration_time,
           int_size,
           string_value,
-          # new_cas_value
+          new_cas_value
       ]
       # Check if the data was correctly saved
       is_saved = @hash_table.has_key? string_key
       if is_saved
-        # @cas_value = new_cas_value
+        @cas_value = new_cas_value
         "STORED"
       else
         "NOT STORED"
@@ -92,6 +92,7 @@ class Memcached
     array_size = hash_value[2]
     # Sum new size to the previous size in order to keep association between size and value
     new_size = int_size + array_size
+    new_cas_value = @cas_value+1
     new_value_length = new_value.length
 
     if new_value_length > new_size
@@ -102,10 +103,12 @@ class Memcached
           array_exp_time,
           new_size,
           new_value,
+          new_cas_value
       ]
       # Check if the data was correctly saved
       is_saved = @hash_table.has_key? string_key
       if is_saved
+        @cas_value = new_cas_value
         "STORED"
       else
         "NOT STORED"
@@ -143,32 +146,39 @@ class Memcached
   # |    RETRIEVAL COMMANDS    |
   # ============================
 
-  def get
+  def getandgets
+    # Creation of the string to be sent to the client
     final_string = ""
+    # Make sure that the key is an array, in order to handle multiple key values
     array_key = Array(@key)
     array_key.each do |key|
-      if key != 'get'
-        string_key = String(key)
-        begin
-          hash_table_value = @hash_table[string_key]
-          hash_flag = hash_table_value[0]
-          hash_size = hash_table_value[2]
-          hash_value = hash_table_value[3]
-          final_string += "VALUE: #{string_key} #{hash_flag} #{hash_size}
-#{hash_value}
-"
-        rescue NoMethodError => e
+      # Save which command was issued for later use
+      if key == 'get' || key == 'gets'
+        @cmd = key
+      end
 
+      string_key = String(key)
+      # If the key doesn't exist, no error is returned.
+      begin
+        hash_table_value = @hash_table[string_key]
+        hash_flag = hash_table_value[0]
+        hash_size = hash_table_value[2]
+        hash_value = hash_table_value[3]
+
+        # Depending on the command issued, the program will return different strings
+        if @cmd == 'get'
+          final_string += "VALUE: #{string_key} #{hash_flag} #{hash_size}\n#{hash_value}\n"
+        elsif @cmd == 'gets'
+          hash_cas = hash_table_value[4]
+          final_string += "VALUE: #{string_key} #{hash_flag} #{hash_size} #{hash_cas}\n#{hash_value}\n"
         end
+
+      rescue NoMethodError => e
 
       end
     end
+    # Added "END" due to protocol requirements.
     final_string += "END"
     final_string
-  end
-
-  #TODO gets command
-  def gets
-
   end
 end

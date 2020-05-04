@@ -54,12 +54,9 @@ class Connection
             end
 
           # Handling of retrieval commands
-          elsif cmd == 'get'
+          elsif cmd == 'get' || cmd == 'gets'
             mc.key = split_string
-            case cmd
-            when 'get'
-              socket.puts mc.get
-            end
+            socket.puts mc.getandgets
           end
 
           client_input = socket.gets.chomp
