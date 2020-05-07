@@ -28,35 +28,62 @@ class Connection
           cmd = split_string[0]
 
           # Handling of storage commands
-          if cmd == 'set' || cmd == 'add' || cmd == 'replace' || cmd == 'append' || cmd == 'prepend'
+          if cmd == 'set' ||
+              cmd == 'add' ||
+              cmd == 'replace' ||
+              cmd == 'append' ||
+              cmd == 'prepend' ||
+              cmd == 'cas'
+
             key = split_string[1]
             flag = split_string[2]
             exp_time = split_string[3]
             size = split_string[4]
+
             mc.key = key
             mc.flag = flag
             mc.exp_time = exp_time
             mc.size = size
-            # With second_input we receive the data to be inserted
-            second_input = socket.gets.chomp
-            mc.value = second_input
-            case cmd
-            when 'set'
-              socket.puts mc.set
-            when 'add'
-              socket.puts mc.add
-            when 'replace'
-              socket.puts mc.replace
-            when 'append'
-              socket.puts mc.append
-            when 'prepend'
-              socket.puts mc.prepend
+
+            if cmd == 'cas'
+              cas_value = split_string[5]
+              mc.cas_value = cas_value
+            end
+
+            cdi = mc.check_data_integrity
+            if cdi == "OK"
+              # With second_input we receive the data to be inserted
+              second_input = socket.gets.chomp
+              mc.value = second_input
+              case cmd
+              when 'set'
+                mc.search_expired_keys
+                socket.puts mc.set
+              when 'add'
+                mc.search_expired_keys
+                socket.puts mc.add
+              when 'replace'
+                mc.search_expired_keys
+                socket.puts mc.replace
+              when 'append'
+                mc.search_expired_keys
+                socket.puts mc.append
+              when 'prepend'
+                mc.search_expired_keys
+                socket.puts mc.prepend
+              when 'cas'
+                mc.search_expired_keys
+                socket.puts mc.cas
+              end
+            else
+              socket.puts cdi
             end
 
           # Handling of retrieval commands
           elsif cmd == 'get' || cmd == 'gets'
             mc.key = split_string
-            socket.puts mc.getandgets
+            mc.search_expired_keys
+            socket.puts mc.get_and_gets
           end
 
           client_input = socket.gets.chomp
