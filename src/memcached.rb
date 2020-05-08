@@ -28,7 +28,10 @@ class Memcached
         int_exp_time = Integer(@exp_time)
         int_size = Integer(@size)
         string_value = String(@value)
-        int_cas = Integer(@cas_value)
+        if @cas_value != nil
+          int_cas = Integer(@cas_value)
+        end
+
         "OK"
       rescue ArgumentError => e
         "CLIENT_ERROR bad command line format"
@@ -57,8 +60,13 @@ class Memcached
       if int_exp_time == 0
         unix_expiration_time = 0;
       else
-        expiration_time = Time.now + int_exp_time
-        unix_expiration_time = expiration_time.strftime("%s")
+        unix_time_now = Integer(Time.now.strftime("%s"))
+        if int_exp_time >= unix_time_now
+          unix_expiration_time = int_exp_time
+        else
+          expiration_time = Time.now + int_exp_time
+          unix_expiration_time = expiration_time.strftime("%s")
+        end
       end
       @hash_table[string_key] = [
           int_flag,

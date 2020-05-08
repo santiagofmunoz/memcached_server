@@ -83,6 +83,28 @@ class TestSet < Test::Unit::TestCase
     assert_equal("ERROR", mc.check_data_integrity, "ERROR should be returned")
   end
 
+  def test_seconds_exp_time
+    mc = Memcached.new
+    mc.create_hash
+    mc.key = '1'
+    mc.flag = '2'
+    mc.exp_time = '10000'
+    mc.size = '8'
+    mc.value = 'datatest'
+    assert_equal("STORED", mc.set, "STORED should be returned")
+  end
+
+  def test_unix_exp_time
+    mc = Memcached.new
+    mc.create_hash
+    mc.key = '1'
+    mc.flag = '2'
+    mc.exp_time = '1640995199'
+    mc.size = '8'
+    mc.value = 'datatest'
+    assert_equal("STORED", mc.set, "STORED should be returned")
+  end
+
   # ==============
   # |    SIZE    |
   # ==============
