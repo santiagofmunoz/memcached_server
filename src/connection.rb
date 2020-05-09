@@ -24,7 +24,6 @@ class Connection
         until client_input == "quit"
           # Split user's input to know which command was introduced
           split_string = client_input.split
-
           cmd = split_string[0]
 
           # Handling of storage commands
@@ -48,6 +47,17 @@ class Connection
             if cmd == 'cas'
               cas_value = split_string[5]
               mc.cas_value = cas_value
+              if split_string[6] == "noreply"
+                mc.no_reply = true
+              else
+                mc.no_reply = false
+              end
+            else
+              if split_string[5] == "noreply"
+                mc.no_reply = true
+              else
+                mc.no_reply = false
+              end
             end
 
             cdi = mc.check_data_integrity

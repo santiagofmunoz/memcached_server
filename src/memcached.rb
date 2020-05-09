@@ -2,7 +2,7 @@ require 'date'
 
 class Memcached
 
-  attr_accessor :hash_table, :key, :flag, :exp_time, :size, :value, :cas_value
+  attr_accessor :hash_table, :key, :flag, :exp_time, :size, :value, :cas_value, :no_reply
 
   def initialize
     @stored_cas_value = 0
@@ -79,9 +79,13 @@ class Memcached
       is_saved = @hash_table.has_key? string_key
       if is_saved
         @stored_cas_value = new_cas_value
-        "STORED"
+        if @no_reply == false
+          "STORED"
+        end
       else
-        "NOT_STORED"
+        if @no_reply == false
+          "NOT_STORED"
+        end
       end
     end
   end
@@ -91,7 +95,9 @@ class Memcached
     string_key = String(@key)
     key_exists = @hash_table.key? string_key
     if key_exists == true
-      "NOT_STORED"
+      if @no_reply == false
+        "NOT_STORED"
+      end
     else
       set
     end
@@ -104,7 +110,9 @@ class Memcached
     if key_exists == true
       set
     else
-      "NOT_STORED"
+      if @no_reply == false
+        "NOT_STORED"
+      end
     end
   end
 
@@ -136,9 +144,13 @@ class Memcached
       is_saved = @hash_table.has_key? string_key
       if is_saved
         @stored_cas_value = new_cas_value
-        "STORED"
+        if @no_reply == false
+          "STORED"
+        end
       else
-        "NOT_STORED"
+        if @no_reply == false
+          "NOT_STORED"
+        end
       end
     end
   end
@@ -159,7 +171,9 @@ class Memcached
     string_value = String(@value)
     array_value = get_array_value
     if array_value == "NOT_STORED"
-      "NOT_STORED"
+      if @no_reply == false
+        "NOT_STORED"
+      end
     else
       new_value = array_value.insert(-1, string_value)
       pend(new_value)
@@ -170,14 +184,15 @@ class Memcached
     string_value = String(@value)
     array_value = get_array_value
     if array_value == "NOT_STORED"
-      "NOT_STORED"
+      if @no_reply == false
+        "NOT_STORED"
+      end
     else
       new_value = array_value.insert(0, string_value)
       pend(new_value)
     end
   end
 
-  #TODO cas command
   def cas
     if @cas_value == nil
       "ERROR"
@@ -188,12 +203,16 @@ class Memcached
         hash_value = @hash_table.fetch(string_key)
         cas_value = hash_value[4]
         if int_cas != cas_value
-          "EXISTS"
+          if @no_reply == false
+            "EXISTS"
+          end
         else
           set
         end
       rescue
-        "NOT_FOUND"
+        if @no_reply == false
+          "NOT_FOUND"
+        end
       end
     end
   end

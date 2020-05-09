@@ -9,6 +9,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     mc.set
 
@@ -16,10 +17,33 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '3'
     mc.exp_time = '20000'
     mc.size = '15'
+    mc.no_reply = false
     mc.value = 'anotherdatatest'
     mc.cas_value = '1'
 
     assert_equal("STORED", mc.cas, "STORED should be returned")
+    end
+
+  def test_normal_cas_no_reply
+    mc = Memcached.new
+    mc.create_hash
+    mc.key = '1'
+    mc.flag = '2'
+    mc.exp_time = '10000'
+    mc.size = '8'
+    mc.no_reply = false
+    mc.value = 'datatest'
+    mc.set
+
+    mc.key = '1'
+    mc.flag = '3'
+    mc.exp_time = '20000'
+    mc.size = '15'
+    mc.no_reply = true
+    mc.value = 'anotherdatatest'
+    mc.cas_value = '1'
+
+    assert_equal(nil, mc.cas, "nil should be returned")
   end
 
   def test_empty_cas_value
@@ -29,6 +53,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     mc.set
 
@@ -36,6 +61,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '3'
     mc.exp_time = '20000'
     mc.size = '15'
+    mc.no_reply = false
     mc.value = 'anotherdatatest'
 
     assert_equal("ERROR", mc.cas, "ERROR should be returned")
@@ -48,6 +74,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     mc.set
 
@@ -55,6 +82,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '3'
     mc.exp_time = '20000'
     mc.size = '15'
+    mc.no_reply = false
     mc.value = 'anotherdatatest'
     mc.cas_value = '2' # cas_value should be '1' because it the counter starts at '1'
 
@@ -68,6 +96,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     mc.set
 
@@ -75,6 +104,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '3'
     mc.exp_time = '20000'
     mc.size = '15'
+    mc.no_reply = false
     mc.value = 'anotherdatatest'
     mc.cas_value = '1'
 
@@ -88,6 +118,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     mc.set
 
@@ -95,6 +126,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '3'
     mc.exp_time = '20000'
     mc.size = '15'
+    mc.no_reply = false
     mc.value = 'anotherdatatest'
     mc.cas_value = 'data'
 
@@ -109,6 +141,7 @@ class TestCas < Test::Unit::TestCase
     mc.flag = '3'
     mc.exp_time = '20000'
     mc.size = '15'
+    mc.no_reply = false
     mc.value = 'anotherdatatest'
     mc.cas_value = '1'
 

@@ -10,8 +10,21 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("STORED", mc.set, "STORED should be returned")
+  end
+
+  def test_normal_set_no_reply
+    mc = Memcached.new
+    mc.create_hash
+    mc.key = '1'
+    mc.flag = '2'
+    mc.exp_time = '10000'
+    mc.size = '8'
+    mc.no_reply = true
+    mc.value = 'datatest'
+    assert_equal(nil, mc.set, "nil should be returned")
   end
 
   # ==============
@@ -25,6 +38,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '-1'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("CLIENT_ERROR bad command line format", mc.set, "CLIENT_ERROR should be returned")
   end
@@ -36,6 +50,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = 'data'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("CLIENT_ERROR bad command line format", mc.check_data_integrity, "CLIENT_ERROR should be returned")
   end
@@ -59,6 +74,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '-1'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("STORED", mc.set, "STORED should be returned")
   end
@@ -70,6 +86,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = 'data'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("CLIENT_ERROR bad command line format", mc.check_data_integrity, "CLIENT_ERROR should be returned")
   end
@@ -90,6 +107,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("STORED", mc.set, "STORED should be returned")
   end
@@ -101,6 +119,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '1640995199'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("STORED", mc.set, "STORED should be returned")
   end
@@ -116,6 +135,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '-1'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("CLIENT_ERROR bad command line format", mc.set, "CLIENT_ERROR should be returned")
   end
@@ -127,6 +147,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = 'data'
+    mc.no_reply = false
     mc.value = 'datatest'
     assert_equal("CLIENT_ERROR bad command line format", mc.check_data_integrity, "CLIENT_ERROR should be returned")
   end
@@ -152,6 +173,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = ''
     assert_equal("STORED", mc.set, "STORED should be returned")
   end
@@ -163,6 +185,7 @@ class TestSet < Test::Unit::TestCase
     mc.flag = '2'
     mc.exp_time = '10000'
     mc.size = '8'
+    mc.no_reply = false
     mc.value = 'datatest1'
     assert_equal("CLIENT_ERROR bad data chunk", mc.set, "CLIENT_ERROR should be returned")
   end
