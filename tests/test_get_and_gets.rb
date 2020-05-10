@@ -1,5 +1,5 @@
-require_relative '../src/memcached.rb'
 require 'test/unit'
+require_relative '../src/memcached.rb'
 
 class TestGetAndGets < Test::Unit::TestCase
 

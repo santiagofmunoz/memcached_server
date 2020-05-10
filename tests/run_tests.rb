@@ -5,7 +5,6 @@ require_relative 'test_replace'
 require_relative 'test_pend'
 require_relative 'test_cas'
 require_relative 'test_get_and_gets'
-require_relative 'test_search_expired_keys'
 
 suite = Test::Unit::TestSuite.new
 suite << TestSet.suite
@@ -14,4 +13,3 @@ suite << TestReplace.suite
 suite << TestPend.suite
 suite << TestGetAndGets.suite
 suite << TestCas.suite
-suite << TestSearchExpiredKeys.suite

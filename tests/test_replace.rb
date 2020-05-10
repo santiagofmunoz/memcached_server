@@ -1,5 +1,5 @@
-require_relative '../src/memcached.rb'
 require 'test/unit'
+require_relative '../src/memcached.rb'
 
 class TestReplace < Test::Unit::TestCase
   def test_existent_data

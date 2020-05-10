@@ -1,5 +1,5 @@
-require_relative '../src/memcached.rb'
 require 'test/unit'
+require_relative '../src/memcached.rb'
 
 # This test tests the commands 'append' and 'prepend'
 class TestPend < Test::Unit::TestCase
