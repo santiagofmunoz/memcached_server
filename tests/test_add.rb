@@ -1,5 +1,5 @@
-require_relative '../src/memcached.rb'
 require 'test/unit'
+require_relative '../src/memcached.rb'
 
 class TestAdd < Test::Unit::TestCase
   # The rest of the tests are the ones in test_set since the method only checks if the data already exists
