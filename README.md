@@ -1,4 +1,4 @@
-# memcached_server
+# Memcached Server
 
 ## Introduction
 
@@ -24,6 +24,7 @@ This is an implentation of a memcached server based on the coding challenge by M
 
 - Purge expired keys.
 - Management of multiple clients.
+- Desing load tests and include the test plan (for example, JMeter files) as part of the codebase
 
 ## Installation
 
@@ -50,13 +51,14 @@ Here's a quick view on how to write the commands.
 
 #### Storage Commands
 
-```<command name> <key> <flags> <exptime> <bytes>```
+```<command name> <key> <flags> <exptime> <bytes> [noreply]```
 
 - ```<command name>```: The command that you want to execute (i.e ```set```, ```add```, ```replace```, etc)
 - ```<key>``` : Identification of the value that you want to save (It can be a number, a word, but it can't have whitespaces).
 - ```<flags>```: "Is an arbitrary 16-bit unsigned integer (written out in decimal) that the server stores along with the data and sends back when the item is retrieved. Clients may use this as a bit field to store data-specific information" [Citation from Memcached's protocol](https://github.com/memcached/memcached/blob/82029ecc9b3dd0f57b3f9ab9761f44714cceed6f/doc/protocol.txt#L225)
 - ```<exptime>```: Expiration time of the stored entry. It can be written in seconds or in UNIX Time.
 - ```<bytes>```: Size in bytes (Number) of the value that will be stored. If the value is bigger than the size specified, the object won't be saved.
+- ```[noreply]```: (Optional) Instructs the server to not send the reply
 
 The command cas has a slightly change on its structure.
 
@@ -74,7 +76,7 @@ datatest
 ```
 
 ```
-add a2 1 1640995199 9
+add a2 1 1640995199 9 noreply
 datatest1
 ```
 
@@ -84,7 +86,7 @@ datatest2
 ```
 
 ```
-append a1 1 20000 17
+append a1 1 20000 17 noreply
 datatest3
 ```
 
@@ -114,7 +116,29 @@ datatest5
 
 ## Running the tests
 
-Go to ```tests``` folder in the repository and run ```ruby run_tests.rb```. This will execute all the tests created for the software.
+### Unit tests
+
+Go to ```tests``` folder in the repository and run ```ruby run_tests.rb```. This will execute all the unit tests created for the software.
+
+### JMeter test
+
+To run the JMeter tests, you'll have to open the file ```JMeter_test.jmx``` with Apache JMeter. There, you'll find this structure.
+
+- Test Plan
+  - Thread Group
+    - [...] Command
+      - View Results Tree
+    - [...] Command
+      - View Results Tree
+    - TCP Sampler Config
+
+In "Thread Group" you can configure the number of users that are going to execute the commands, which by default are configured at 100 users. Also you can configure the ramp-up period, loop count, etc.
+
+Inside "Thread Group" you'll find each command in a different sampler and inside every sampler, a table to see the results of the execution.
+
+In order to execute the samplers, you have to enable each one of them separately (also disabling the previous enabled one) and run the test. After all the users have connected to the socket, you'll have to stop the test manually in order to see the results of the test (Sorry about this, it's my first time using this program and I don't fully know how to use it). The results will be displayed in red and with a cross, indicating that they've failed. Fear not, this doesn't mean that the test has failed, the real result is displayed in the tab "Response data", inside the results tree. If the result in "Response data" is the one expected, the test is successful, otherwise, it has failed.
+
+In "TCP Sampler Config" you can find the configuration set to all the samplers, there you can change the IP of the Memcached server if you have the server in another IP apart from "127.0.0.1", the port number (11211 is the default port number, also the one used by Memcached) and other configurations. Remember that changes in this element will have repercussion on all the samplers.
 
 ## References
 
