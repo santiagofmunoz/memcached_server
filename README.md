@@ -28,7 +28,7 @@ This is an implentation of a memcached server based on the coding challenge by M
 
 ## Installation
 
-Clone or download this repository to any directory you want in your computer. After that, you have to open a Terminal/Cmd (depending on your OS) where you cloned the repository and run ```ruby startServer.rb```
+Clone or download this repository to any directory you want in your computer. After that, you have to open a Terminal/Cmd (depending on your OS) where you cloned the repository and run ```ruby start_server.rb```
 
 The software was created and tested in this environment and due to this, it's the recommended environment to run it:
 
@@ -122,7 +122,7 @@ Go to ```tests``` folder in the repository and run ```ruby run_tests.rb```. This
 
 ### JMeter test
 
-To run the JMeter tests, you'll have to open the file ```JMeter_test.jmx``` with Apache JMeter. There, you'll find this structure.
+To run the JMeter tests, you'll have to open the file ```jmeter_test.jmx``` with Apache JMeter. There, you'll find this structure.
 
 - Test Plan
   - Thread Group
