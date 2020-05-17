@@ -14,12 +14,11 @@ class Retrieval
       string_key = String(key)
       # If the key doesn't exist, no error is returned.
       if mc.hash_empty == false
-        begin
-          hash_table_value = mc.hash_key(string_key)
+        hash_table_value = mc.hash_key(string_key)
+        if hash_table_value.nil? == false
           hash_flag = hash_table_value.instance_variable_get(:@flag)
           hash_size = hash_table_value.instance_variable_get(:@size)
           hash_value = hash_table_value.instance_variable_get(:@value)
-
 
           # Depending on the command issued, the program will return different strings
           if @cmd == 'get'
@@ -28,8 +27,6 @@ class Retrieval
             hash_cas = hash_table_value.instance_variable_get(:@cas_value)
             final_string += "VALUE: #{string_key} #{hash_flag} #{hash_size} #{hash_cas}\n#{hash_value}\n"
           end
-        rescue NoMethodError => e
-
         end
       end
     end
