@@ -33,12 +33,28 @@ class Memcached
     HASH_TABLE.empty?
   end
 
+  def hash_clear
+    HASH_TABLE.clear
+  end
+
   # ============================
   # |    PURGE EXPIRED KEYS    |
   # ============================
 
-  def purge_expired_keys
-    now = Time.now.strftime('%s')
-    HASH_TABLE.delete_if{|k, v| v.instance_variable_get(:@exp_time) < now}
+  def purge_expired_keys(keys)
+    if HASH_TABLE.empty? == false
+      now = Time.now.strftime('%s')
+      array_keys = Array(keys)
+      array_keys.each do |key|
+        string_key = String(key)
+        if HASH_TABLE.has_key? string_key
+          hash_element = HASH_TABLE.fetch(string_key)
+          el_exp_time = hash_element.instance_variable_get(:@exp_time)
+          if el_exp_time <= now
+            HASH_TABLE.delete(string_key)
+          end
+        end
+      end
+    end
   end
 end

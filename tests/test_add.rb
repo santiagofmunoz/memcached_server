@@ -1,68 +1,59 @@
 require 'test/unit'
-require_relative '../src/memcached.rb'
+require_relative '../src/storage'
 
 class TestAdd < Test::Unit::TestCase
+
+  STORED = "STORED"
+  STORED_MESSAGE = "STORED should be returned"
+  NOT_STORED = "NOT_STORED"
+  NOT_STORED_MESSAGE = "NOT_STORED should be returned"
+  NIL_MESSAGE = "nil should be returned"
+
   # The rest of the tests are the ones in test_set since the method only checks if the data already exists
+  def setup
+    @key = '1'
+    @flag = 2
+    @exp_time = 10000
+    @size = 8
+    @value = 'datatest'
+    @no_reply = false
+    @store = Storage.new
+    @store.initialize_stored_cas_value
+
+    @key2 = '2'
+    @flag2 = 3
+    @exp_time2 = 20000
+    @size2 = 15
+    @value2 = 'anotherdatatest'
+  end
+
   def test_existent_data
     # Creation of an element
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '3'
-    mc.exp_time = '20000'
-    mc.size = '15'
-    mc.no_reply = false
-    mc.value = 'anotherdatatest'
-    assert_equal("NOT_STORED", mc.add, "NOT_STORED should be returned")
+    assert_equal(NOT_STORED, @store.add(@key, @flag2, @exp_time2, @size2, @value2, @no_reply), NOT_STORED_MESSAGE)
+  end
+
+  def test_existent_data_no_reply
+    # Creation of an element
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
+
+    no_reply = true
+    assert_equal(nil, @store.add(@key, @flag2, @exp_time2, @size2, @value2, no_reply), NIL_MESSAGE)
   end
 
   def test_non_existent_data
     # Creation of an element
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '2'
-    mc.flag = '3'
-    mc.exp_time = '20000'
-    mc.size = '15'
-    mc.no_reply = false
-    mc.value = 'anotherdatatest'
-    assert_equal("STORED", mc.add, "STORED should be returned")
+    assert_equal(STORED, @store.add(@key2, @flag2, @exp_time2, @size2, @value2, @no_reply), STORED_MESSAGE)
   end
 
   def test_non_existent_data_no_reply
     # Creation of an element
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '2'
-    mc.flag = '3'
-    mc.exp_time = '20000'
-    mc.size = '15'
-    mc.no_reply = true
-    mc.value = 'anotherdatatest'
-    assert_equal(nil, mc.add, "Nothing should be returned")
+    no_reply = true
+    assert_equal(nil, @store.add(@key2, @flag2, @exp_time2, @size2, @value2, no_reply), NIL_MESSAGE)
   end
 end

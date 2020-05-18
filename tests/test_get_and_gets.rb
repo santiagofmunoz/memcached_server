@@ -1,52 +1,58 @@
 require 'test/unit'
-require_relative '../src/memcached.rb'
+require_relative '../src/retrieval'
+require_relative '../src/storage'
 
 class TestGetAndGets < Test::Unit::TestCase
+
+  VALUE_MESSAGE = "VALUE should be returned"
+  MULTIPLE_VALUE_MESSAGE = "Two or more 'VALUE' should be returned"
+  END_MESSAGE = "END should be returned"
+
+  def setup
+    @retrieve = Retrieval.new
+    @store = Storage.new
+    @store.initialize_stored_cas_value
+
+    @key = '1'
+    @flag = 2
+    @exp_time = 10000
+    @size = 8
+    @value = 'datatest'
+    @no_reply = false
+
+    @key2 = '2'
+    @flag2 = 3
+    @exp_time2 = 20000
+    @size2 = 15
+    @value2 = 'anotherdatatest'
+  end
 
   # ================
   # |    SINGLE    |
   # ================
 
   def test_normal_single_get
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = ['get', '1']
-    assert_equal("VALUE: 1 2 8\ndatatest\nEND", mc.get_and_gets, "VALUE should be returned")
-  end
-
-  def test_non_existent_key_single_get
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = ['get', '1']
-    assert_equal("END", mc.get_and_gets, "END should be returned")
-  end
-
-  def test_non_existent_key_single_gets
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = ['gets', '1']
-    assert_equal("END", mc.get_and_gets, "END should be returned")
+    key = ['get', '1']
+    assert_equal("VALUE: 1 2 8\ndatatest\nEND", @retrieve.get_and_gets(key), VALUE_MESSAGE)
   end
 
   def test_normal_single_gets
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = ['gets', '1']
-    assert_equal("VALUE: 1 2 8 1\ndatatest\nEND", mc.get_and_gets, "VALUE should be returned")
+    key = ['gets', '1']
+    assert_equal("VALUE: 1 2 8 1\ndatatest\nEND", @retrieve.get_and_gets(key), VALUE_MESSAGE)
+  end
+
+  def test_non_existent_key_single_get
+    key = ['get', '3']
+    assert_equal("END", @retrieve.get_and_gets(key), END_MESSAGE)
+  end
+
+  def test_non_existent_key_single_gets
+    key = ['gets', '3']
+    assert_equal("END", @retrieve.get_and_gets(key), END_MESSAGE)
   end
 
   # ==========================================================================================
@@ -55,58 +61,28 @@ class TestGetAndGets < Test::Unit::TestCase
   # ==========================================================================================
 
   def test_normal_multiple_get
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
+    @store.set(@key2, @flag2, @exp_time2, @size2, @value2, @no_reply)
 
-    mc.key = '2'
-    mc.flag = '3'
-    mc.exp_time = '10000'
-    mc.size = '9'
-    mc.value = 'datatest1'
-    mc.set
-
-    mc.key = ['get', '1', '2']
-    assert_equal("VALUE: 1 2 8\ndatatest\nVALUE: 2 3 9\ndatatest1\nEND", mc.get_and_gets, "Two or more 'VALUE' should be returned")
+    keys = ['get', '1', '2']
+    assert_equal("VALUE: 1 2 8\ndatatest\nVALUE: 2 3 15\nanotherdatatest\nEND", @retrieve.get_and_gets(keys), MULTIPLE_VALUE_MESSAGE)
   end
 
   def test_non_existent_key_multiple_get
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = ['get', '1', '2']
-    assert_equal("END", mc.get_and_gets, "END should be returned")
+    keys = ['get', '3', '4']
+    assert_equal("END", @retrieve.get_and_gets(keys), END_MESSAGE)
   end
 
   def test_non_existent_key_multiple_gets
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = ['gets', '1', '2']
-    assert_equal("END", mc.get_and_gets, "END should be returned")
+    keys = ['gets', '3', '4']
+    assert_equal("END", @retrieve.get_and_gets(keys), END_MESSAGE)
   end
 
   def test_normal_multiple_gets
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
+    @store.set(@key2, @flag2, @exp_time2, @size2, @value2, @no_reply)
 
-    mc.key = '2'
-    mc.flag = '3'
-    mc.exp_time = '10000'
-    mc.size = '9'
-    mc.value = 'datatest1'
-    mc.set
-
-    mc.key = ['get', '1', '2']
-    assert_equal("VALUE: 1 2 8\ndatatest\nVALUE: 2 3 9\ndatatest1\nEND", mc.get_and_gets, "Two or more 'VALUE' should be returned")
+    keys = ['gets', '1', '2']
+    assert_equal("VALUE: 1 2 8 1\ndatatest\nVALUE: 2 3 15 2\nanotherdatatest\nEND", @retrieve.get_and_gets(keys), MULTIPLE_VALUE_MESSAGE)
   end
 end

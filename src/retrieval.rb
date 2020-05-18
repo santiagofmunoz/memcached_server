@@ -3,10 +3,11 @@ require_relative 'memcached'
 class Retrieval
   def get_and_gets(keys)
     mc = Memcached.new
+    array_key = Array(keys)
+    mc.purge_expired_keys(array_key[1..-1])
     # Creation of the string to be sent to the client
     final_string = ""
     # Make sure that the key is an array, in order to handle multiple key values
-    array_key = Array(keys)
     @cmd = array_key[0]
     array_key[1..-1].each do |key|
       # Save which command was issued for later use

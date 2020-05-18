@@ -24,7 +24,6 @@ class Storage
       ERROR
     else
       begin
-        is_ok = true
         String(key)
         int_flag = Integer(flag)
         Integer(exp_time)
@@ -35,13 +34,12 @@ class Storage
           Integer(cas_value)
         end
         if int_flag < 0 || int_size < 0
-          is_ok = false
           CE_BCLF
         elsif value_length > int_size
-          is_ok = false
           CE_BDC
-        end
-        if is_ok == true
+        else
+          mc = Memcached.new
+          mc.purge_expired_keys(key)
           OK
         end
       rescue ArgumentError => e
@@ -75,7 +73,7 @@ class Storage
     mc_obj.hash_store(string_key, mc_obj)
     @stored_cas_value = new_cas_value
     if no_reply == false
-      STORED
+        STORED
     end
   end
 

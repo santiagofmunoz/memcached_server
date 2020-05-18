@@ -1,112 +1,64 @@
 require 'test/unit'
-require_relative '../src/memcached.rb'
+require_relative '../src/storage'
 
 # This test tests the commands 'append' and 'prepend'
 class TestPend < Test::Unit::TestCase
+
+  STORED = "STORED"
+  STORED_MESSAGE = "STORED should be returned"
+  NOT_STORED = "NOT_STORED"
+  NOT_STORED_MESSAGE = "NOT_STORED should be returned"
+  NIL_MESSAGE = "nil should be returned"
+  CE_BDC = "CLIENT_ERROR bad data chunk"
+  CE_MESSAGE = "CLIENT_ERROR should be returned"
+
+  def setup
+    @key = '1'
+    @flag = 2
+    @exp_time = 10000
+    @size = 8
+    @cas_value = 1
+    @value = 'datatest'
+    @no_reply = false
+    @store = Storage.new
+    @store.initialize_stored_cas_value
+
+    @key2 = '2'
+    @size_append = 13
+    @size_prepend = 14
+    @value_append = '_appendeddata'
+    @value_prepend = 'prependeddata_'
+  end
 
   # ================
   # |    APPEND    |
   # ================
 
   def test_normal_append
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '13'
-    mc.no_reply = false
-    mc.value = '_appendeddata'
-    assert_equal("STORED", mc.append, "STORED should be returned")
+    assert_equal(STORED, @store.append(@key, @size_append, @value_append, @no_reply), STORED_MESSAGE)
   end
 
   def test_normal_append_no_reply
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '13'
-    mc.no_reply = true
-    mc.value = '_appendeddata'
-    assert_equal(nil, mc.append, "nil should be returned")
+    no_reply = true
+    assert_equal(nil, @store.append(@key, @size_append, @value_append, no_reply), NIL_MESSAGE)
   end
 
   def test_non_existent_key_append
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '2'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '13'
-    mc.no_reply = false
-    mc.value = '_appendeddata'
-    assert_equal("NOT_STORED", mc.append, "NOT_STORED should be returned")
-  end
-
-  # This test also applies for prepend.
-  def test_string_size_append
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
-
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = 'data'
-    mc.no_reply = false
-    mc.value = '_appendeddata'
-    assert_equal("CLIENT_ERROR bad command line format", mc.check_data_integrity, "CLIENT_ERROR should be returned")
+    key = '3'
+    assert_equal(NOT_STORED, @store.append(key, @size_append, @value_append, @no_reply), NOT_STORED_MESSAGE)
   end
 
   def test_wrong_value_size_append
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '13'
-    mc.no_reply = false
-    mc.value = '_appendeddata1'
-    assert_equal("CLIENT_ERROR bad data chunk", mc.append, "CLIENT_ERROR should be returned")
+    value = '_appendeddata1'
+    assert_equal(CE_BDC, @store.append(@key, @size_append, value, @no_reply), CE_MESSAGE)
   end
 
   # =================
@@ -114,82 +66,29 @@ class TestPend < Test::Unit::TestCase
   # =================
 
   def test_normal_prepend
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '14'
-    mc.no_reply = false
-    mc.value = 'prependeddata_'
-    assert_equal("STORED", mc.prepend, "STORED should be returned")
+    assert_equal(STORED, @store.prepend(@key, @size_prepend, @value_prepend, @no_reply), STORED_MESSAGE)
   end
 
   def test_normal_prepend_no_reply
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '14'
-    mc.no_reply = true
-    mc.value = 'prependeddata_'
-    assert_equal(nil, mc.prepend, "nil should be returned")
+    no_reply = true
+    assert_equal(nil, @store.prepend(@key, @size_prepend, @value_prepend, no_reply), NIL_MESSAGE)
   end
 
   def test_non_existent_key_prepend
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '2'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '14'
-    mc.no_reply = false
-    mc.value = 'prependeddata_'
-    assert_equal("NOT_STORED", mc.prepend, "NOT_STORED should be returned")
+    key = '3'
+    assert_equal(NOT_STORED, @store.prepend(key, @size_prepend, @value_prepend, @no_reply), NOT_STORED_MESSAGE)
   end
 
   def test_wrong_value_size_prepend
-    mc = Memcached.new
-    mc.create_hash
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '8'
-    mc.no_reply = false
-    mc.value = 'datatest'
-    mc.set
+    @store.set(@key, @flag, @exp_time, @size, @value, @no_reply)
 
-    mc.key = '1'
-    mc.flag = '2'
-    mc.exp_time = '10000'
-    mc.size = '14'
-    mc.no_reply = false
-    mc.value = 'prependeddata_1'
-    assert_equal("CLIENT_ERROR bad data chunk", mc.prepend, "CLIENT_ERROR should be returned")
+    value = 'prependeddata_1'
+    assert_equal(CE_BDC, @store.prepend(@key, @size_prepend, value, @no_reply), CE_MESSAGE)
   end
 end
