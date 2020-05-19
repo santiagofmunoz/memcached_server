@@ -1,4 +1,5 @@
 require 'test/unit'
+require_relative 'test_connection'
 require_relative 'test_check_data_integrity'
 require_relative 'test_set'
 require_relative 'test_add'
@@ -9,6 +10,7 @@ require_relative 'test_get_and_gets'
 require_relative 'test_purge_expired_keys'
 
 suite = Test::Unit::TestSuite.new
+suite << TestConnection.suite
 suite << TestCheckDataIntegrity.suite
 suite << TestSet.suite
 suite << TestAdd.suite

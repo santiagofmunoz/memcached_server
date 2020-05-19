@@ -41,6 +41,9 @@ class Memcached
   # |    PURGE EXPIRED KEYS    |
   # ============================
 
+  # This function searches only the request keys introduced in the command written by the user.
+  # This gives the user the sense of "automatic purge of keys when they're expired" thus, optimizing
+  # time and computing resources by not deleting unrequested elements.
   def purge_expired_keys(keys)
     if HASH_TABLE.empty? == false
       now = Time.now.strftime('%s')
